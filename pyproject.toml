@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "greet-cli"
+version = "0.1.0"
+description = "A tiny command-line tool that greets people."
+readme = "README.md"
+requires-python = ">=3.9"
+
+[project.scripts]
+greet = "greet_cli.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
