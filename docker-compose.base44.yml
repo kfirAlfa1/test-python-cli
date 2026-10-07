@@ -1,0 +1,39 @@
+# Base44 sandbox compose — development only.
+#
+# greet-cli is a plain Python CLI package (no web server of its own), so this
+# runs it straight from the cloned source plus a dev-only preview harness
+# (preview/server.py) that serves the CLI on host port 3000 so it can be driven
+# from the preview. See AGENTS.md.
+services:
+  greet-preview:
+    image: python:3.12-slim
+    working_dir: /app
+    restart: on-failure
+    ports:
+      - "3000:3000"
+    environment:
+      - BASE44_PREVIEW_MODE
+      - PYTHONDONTWRITEBYTECODE=1
+    volumes:
+      # Live source: the package is installed in editable mode, so edits to
+      # src/ and preview/ apply without rebuilding.
+      - .:/app
+    command:
+      - sh
+      - -ec
+      - |
+        pip install --no-cache-dir -e . -r preview/requirements.txt
+        exec uvicorn preview.server:app --host 0.0.0.0 --port 3000 \
+          --reload --reload-dir /app/src --reload-dir /app/preview
+    healthcheck:
+      # Probes both the served page and the installed CLI entry point.
+      test:
+        - CMD-SHELL
+        - >-
+          python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:3000/', timeout=5)"
+          && greet --version >/dev/null
+          || { echo 'greet-preview unhealthy: page or greet CLI check failed'; exit 1; }
+      interval: 10s
+      timeout: 8s
+      retries: 6
+      start_period: 60s
