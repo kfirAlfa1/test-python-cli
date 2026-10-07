@@ -7,7 +7,7 @@ name = "greet-cli"
 version = "0.1.0"
 description = "A tiny command-line tool that greets people."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 [project.scripts]
 greet = "greet_cli.cli:main"
